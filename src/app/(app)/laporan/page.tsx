@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { AppNav } from "@/app/components/AppNav";
 import { formatRupiah } from "@/lib/money";
 import {
   BarChart,
@@ -34,7 +33,6 @@ export default function LaporanPage() {
 
   return (
     <>
-      <AppNav />
       <main className="mx-auto max-w-5xl p-6">
         <h1 className="mb-4 text-2xl font-semibold tracking-tight">Laporan</h1>
 

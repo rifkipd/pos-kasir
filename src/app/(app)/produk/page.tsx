@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { AppNav } from "@/app/components/AppNav";
 import { ProductForm, type ProductInput } from "@/app/components/ProductForm";
 import { formatRupiah } from "@/lib/money";
 
@@ -45,7 +44,6 @@ export default function ProdukPage() {
 
   return (
     <>
-      <AppNav />
       <main
         style={{
           maxWidth: "896px",

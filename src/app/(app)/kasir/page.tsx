@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { AppNav } from "@/app/components/AppNav";
 import { Receipt, type ReceiptData } from "@/app/components/Receipt";
 import { calcTotal, calcChange, type CartLine } from "@/lib/cart";
 import { formatRupiah, parseRupiah } from "@/lib/money";
@@ -102,7 +101,6 @@ export default function KasirPage() {
 
   return (
     <>
-      <AppNav />
       <main
         style={{
           maxWidth: "1152px",
