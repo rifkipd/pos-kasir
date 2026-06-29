@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Product {
+  id        Int      @id @default(autoincrement())
+  name      String
+  sku       String?  @unique
+  price     Int
+  stock     Int      @default(0)
+  category  String?
+  isActive  Boolean  @default(true)
+  items     TransactionItem[]
+  createdAt DateTime @default(now())
+}
+
+model Transaction {
+  id            Int      @id @default(autoincrement())
+  invoiceNo     String   @unique
+  createdAt     DateTime @default(now())
+  totalAmount   Int
+  paidAmount    Int
+  changeAmount  Int
+  paymentMethod String   @default("cash")
+  items         TransactionItem[]
+}
+
+model TransactionItem {
+  id            Int         @id @default(autoincrement())
+  transactionId Int
+  productId     Int
+  quantity      Int
+  priceAtSale   Int
+  subtotal      Int
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  product       Product     @relation(fields: [productId], references: [id])
+}
+
+model User {
+  id           Int    @id @default(autoincrement())
+  username     String @unique
+  passwordHash String
+}
