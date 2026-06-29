@@ -46,31 +46,14 @@ export function ProductForm({
     <div>
       <form
         onSubmit={submit}
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "8px",
-          border: "1px solid var(--line)",
-          borderRadius: "10px",
-          background: "var(--surface)",
-          padding: "16px",
-        }}
+        className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4 elev-1 flex flex-wrap gap-3"
       >
         <input
           placeholder="Nama"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          style={{
-            flex: "1 1 180px",
-            border: "1px solid var(--line)",
-            borderRadius: "8px",
-            padding: "8px 12px",
-            fontSize: "14px",
-            color: "var(--ink)",
-            background: "var(--bg)",
-            outline: "none",
-          }}
+          className="flex-[1_1_180px] rounded-lg border border-[var(--line)] px-3 py-2 text-sm text-[var(--ink)] bg-[var(--bg)] outline-none focus:border-[var(--primary)]"
         />
         <input
           placeholder="Harga"
@@ -78,16 +61,7 @@ export function ProductForm({
           onChange={(e) => setPrice(e.target.value)}
           type="number"
           min="0"
-          style={{
-            width: "128px",
-            border: "1px solid var(--line)",
-            borderRadius: "8px",
-            padding: "8px 12px",
-            fontSize: "14px",
-            color: "var(--ink)",
-            background: "var(--bg)",
-            outline: "none",
-          }}
+          className="w-32 rounded-lg border border-[var(--line)] px-3 py-2 text-sm text-[var(--ink)] bg-[var(--bg)] outline-none focus:border-[var(--primary)]"
         />
         <input
           placeholder="Stok"
@@ -95,44 +69,18 @@ export function ProductForm({
           onChange={(e) => setStock(e.target.value)}
           type="number"
           min="0"
-          style={{
-            width: "96px",
-            border: "1px solid var(--line)",
-            borderRadius: "8px",
-            padding: "8px 12px",
-            fontSize: "14px",
-            color: "var(--ink)",
-            background: "var(--bg)",
-            outline: "none",
-          }}
+          className="w-24 rounded-lg border border-[var(--line)] px-3 py-2 text-sm text-[var(--ink)] bg-[var(--bg)] outline-none focus:border-[var(--primary)]"
         />
         <button
           type="submit"
           disabled={loading}
-          style={{
-            background: "var(--accent)",
-            color: "#fff",
-            border: "none",
-            borderRadius: "8px",
-            padding: "8px 20px",
-            fontSize: "14px",
-            fontWeight: 500,
-            cursor: loading ? "not-allowed" : "pointer",
-            opacity: loading ? 0.7 : 1,
-          }}
+          className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--primary-container)] disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
         >
           {loading ? "Menyimpan..." : "Tambah"}
         </button>
       </form>
       {error && (
-        <p
-          style={{
-            marginTop: "8px",
-            fontSize: "13px",
-            color: "#b91c1c",
-            paddingLeft: "4px",
-          }}
-        >
+        <p className="mt-2 text-sm text-[var(--error)] pl-1">
           {error}
         </p>
       )}

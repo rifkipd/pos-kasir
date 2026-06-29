@@ -43,99 +43,52 @@ export default function ProdukPage() {
   }
 
   return (
-    <>
-      <main
-        style={{
-          maxWidth: "896px",
-          margin: "0 auto",
-          padding: "32px 24px",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "22px",
-            fontWeight: 600,
-            letterSpacing: "-0.02em",
-            color: "var(--ink)",
-            marginBottom: "20px",
-          }}
-        >
-          Produk
-        </h1>
+    <main className="mx-auto max-w-6xl space-y-6 px-6 py-8">
+      <h1 className="text-2xl font-bold text-[var(--ink)]">Produk</h1>
 
-        <div style={{ marginBottom: "24px" }}>
-          <ProductForm onSubmit={add} />
-        </div>
+      <ProductForm onSubmit={add} />
 
-        <div
-          style={{
-            border: "1px solid var(--line)",
-            borderRadius: "10px",
-            background: "var(--surface)",
-            overflow: "hidden",
-          }}
-        >
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
-            <thead>
-              <tr
-                style={{
-                  borderBottom: "1px solid var(--line)",
-                  textAlign: "left",
-                  color: "var(--muted)",
-                }}
-              >
-                <th style={{ padding: "10px 14px", fontWeight: 500 }}>Nama</th>
-                <th style={{ padding: "10px 14px", fontWeight: 500 }}>Harga</th>
-                <th style={{ padding: "10px 14px", fontWeight: 500 }}>Stok</th>
-                <th style={{ padding: "10px 14px", fontWeight: 500 }}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={4}
-                    style={{
-                      padding: "24px 14px",
-                      textAlign: "center",
-                      color: "var(--muted)",
-                    }}
-                  >
-                    Belum ada produk.
-                  </td>
-                </tr>
-              )}
-              {products.map((p) => (
-                <tr
-                  key={p.id}
-                  style={{ borderBottom: "1px solid var(--line)" }}
+      <div className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--card)] elev-1">
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="text-left border-b border-[var(--line)]">
+              <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-[var(--muted)]">Nama</th>
+              <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-[var(--muted)]">Harga</th>
+              <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-[var(--muted)]">Stok</th>
+              <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-[var(--muted)]"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.length === 0 && (
+              <tr>
+                <td
+                  colSpan={4}
+                  className="px-4 py-6 text-center text-[var(--muted)]"
                 >
-                  <td style={{ padding: "10px 14px", color: "var(--ink)" }}>{p.name}</td>
-                  <td style={{ padding: "10px 14px", color: "var(--ink)" }}>
-                    {formatRupiah(p.price)}
-                  </td>
-                  <td style={{ padding: "10px 14px", color: "var(--ink)" }}>{p.stock}</td>
-                  <td style={{ padding: "10px 14px", textAlign: "right" }}>
-                    <button
-                      onClick={() => remove(p.id)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "#b91c1c",
-                        fontSize: "13px",
-                        cursor: "pointer",
-                        padding: "2px 4px",
-                      }}
-                    >
-                      Hapus
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </main>
-    </>
+                  Belum ada produk.
+                </td>
+              </tr>
+            )}
+            {products.map((p) => (
+              <tr key={p.id} className="border-t border-[var(--line)]">
+                <td className="px-4 py-3 text-[var(--ink)]">{p.name}</td>
+                <td className="px-4 py-3 text-[var(--ink)]">
+                  {formatRupiah(p.price)}
+                </td>
+                <td className="px-4 py-3 text-[var(--ink)]">{p.stock}</td>
+                <td className="px-4 py-3 text-right">
+                  <button
+                    onClick={() => remove(p.id)}
+                    className="text-[var(--error)] hover:underline text-sm cursor-pointer bg-transparent border-none p-0"
+                  >
+                    Hapus
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </main>
   );
 }
