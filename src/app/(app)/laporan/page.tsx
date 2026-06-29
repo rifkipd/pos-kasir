@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { formatRupiah } from "@/lib/money";
+import { StatCard } from "@/app/components/ui/StatCard";
 import {
   BarChart,
   Bar,
@@ -32,56 +33,28 @@ export default function LaporanPage() {
   }, []);
 
   return (
-    <>
-      <main className="mx-auto max-w-5xl p-6">
-        <h1 className="mb-4 text-2xl font-semibold tracking-tight">Laporan</h1>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <h1 className="text-2xl font-bold text-[var(--ink)]">Laporan</h1>
 
-        {/* Summary cards */}
-        <div className="mb-6 grid grid-cols-2 gap-4">
-          <div
-            className="rounded-lg p-5"
-            style={{
-              border: "1px solid var(--line)",
-              background: "var(--surface)",
-            }}
-          >
-            <div className="text-sm" style={{ color: "var(--muted)" }}>
-              Total Penjualan
-            </div>
-            <div className="mt-1 text-2xl font-semibold">
-              {formatRupiah(summary.totalSales)}
-            </div>
-          </div>
-          <div
-            className="rounded-lg p-5"
-            style={{
-              border: "1px solid var(--line)",
-              background: "var(--surface)",
-            }}
-          >
-            <div className="text-sm" style={{ color: "var(--muted)" }}>
-              Jumlah Transaksi
-            </div>
-            <div className="mt-1 text-2xl font-semibold">
-              {summary.transactionCount}
-            </div>
-          </div>
-        </div>
+      {/* Summary cards */}
+      <div className="grid grid-cols-2 gap-4">
+        <StatCard
+          label="Total Penjualan"
+          value={formatRupiah(summary.totalSales)}
+          icon="payments"
+        />
+        <StatCard
+          label="Jumlah Transaksi"
+          value={String(summary.transactionCount)}
+          icon="receipt_long"
+        />
+      </div>
 
-        {/* Bar chart */}
-        <div
-          className="mb-6 rounded-lg p-4"
-          style={{
-            border: "1px solid var(--line)",
-            background: "var(--surface)",
-            height: "16rem",
-          }}
-        >
+      {/* Bar chart */}
+      <div className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-5 elev-1">
+        <div style={{ height: "16rem" }}>
           {daily.length === 0 ? (
-            <div
-              className="flex h-full items-center justify-center text-sm"
-              style={{ color: "var(--muted)" }}
-            >
+            <div className="flex h-full items-center justify-center text-sm text-[var(--muted)]">
               Belum ada data penjualan harian.
             </div>
           ) : (
@@ -90,61 +63,54 @@ export default function LaporanPage() {
                 <XAxis dataKey="date" fontSize={12} />
                 <YAxis fontSize={12} tickFormatter={(v) => formatRupiah(Number(v))} width={100} />
                 <Tooltip formatter={(v) => formatRupiah(Number(v))} />
-                <Bar dataKey="total" fill="#2f6f4f" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="total" fill="#24389c" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
         </div>
+      </div>
 
-        {/* Transactions table */}
-        <div
-          className="overflow-hidden rounded-lg"
-          style={{ border: "1px solid var(--line)", background: "var(--surface)" }}
-        >
-          <table className="w-full text-sm">
-            <thead
-              className="text-left"
-              style={{
-                borderBottom: "1px solid var(--line)",
-                color: "var(--muted)",
-              }}
-            >
+      {/* Transactions table */}
+      <div className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--card)] elev-1">
+        <table className="w-full text-sm">
+          <thead className="text-left">
+            <tr>
+              <th className="p-3 text-xs font-medium uppercase tracking-wide text-[var(--muted)]">
+                Invoice
+              </th>
+              <th className="p-3 text-xs font-medium uppercase tracking-wide text-[var(--muted)]">
+                Tanggal
+              </th>
+              <th className="p-3 text-xs font-medium uppercase tracking-wide text-[var(--muted)]">
+                Total
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {txs.length === 0 ? (
               <tr>
-                <th className="p-3 font-medium">Invoice</th>
-                <th className="p-3 font-medium">Tanggal</th>
-                <th className="p-3 font-medium">Total</th>
+                <td
+                  colSpan={3}
+                  className="p-6 text-center text-sm text-[var(--muted)]"
+                >
+                  Belum ada transaksi.
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {txs.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={3}
-                    className="p-6 text-center text-sm"
-                    style={{ color: "var(--muted)" }}
-                  >
-                    Belum ada transaksi.
-                  </td>
+            ) : (
+              txs.map((t) => (
+                <tr
+                  key={t.id}
+                  className="border-t border-[var(--line)] hover:bg-[var(--surface-container)]"
+                >
+                  <td className="p-3 font-mono text-[var(--primary)]">{t.invoiceNo}</td>
+                  <td className="p-3">{new Date(t.createdAt).toLocaleString("id-ID")}</td>
+                  <td className="p-3">{formatRupiah(t.totalAmount)}</td>
                 </tr>
-              ) : (
-                txs.map((t) => (
-                  <tr
-                    key={t.id}
-                    style={{ borderBottom: "1px solid var(--line)" }}
-                    className="last:border-0"
-                  >
-                    <td className="p-3">{t.invoiceNo}</td>
-                    <td className="p-3">
-                      {new Date(t.createdAt).toLocaleString("id-ID")}
-                    </td>
-                    <td className="p-3">{formatRupiah(t.totalAmount)}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </main>
-    </>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
