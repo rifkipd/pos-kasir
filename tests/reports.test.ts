@@ -3,7 +3,7 @@ import type { PrismaClient } from "@prisma/client";
 import { freshDb } from "./helpers/db";
 import { createProduct } from "@/lib/products";
 import { createTransaction } from "@/lib/transactions";
-import { getSummary, getDailySales, listTransactions } from "@/lib/reports";
+import { getSummary, getDailySales, listTransactions, getBestSellers, getInventoryStatus } from "@/lib/reports";
 
 let db: PrismaClient;
 let tx1Id: number;
@@ -99,4 +99,31 @@ test("listTransactions: range filter excludes out-of-range transactions", async 
   // Only tx2 is in range
   expect(list).toHaveLength(1);
   expect(list[0].id).toBe(tx2Id);
+});
+
+test("getBestSellers mengurutkan berdasarkan qty terjual", async () => {
+  const db2 = freshDb("test-bestsellers.db");
+  const kopi = await createProduct(db2, { name: "Kopi", price: 10000, stock: 100 });
+  const teh = await createProduct(db2, { name: "Teh", price: 8000, stock: 100 });
+  await createTransaction(db2, { lines: [{ productId: kopi.id, quantity: 2 }], paidAmount: 20000 });
+  await createTransaction(db2, { lines: [{ productId: teh.id, quantity: 5 }], paidAmount: 40000 });
+  const top = await getBestSellers(db2);
+  expect(top[0].name).toBe("Teh");
+  expect(top[0].qtySold).toBe(5);
+  expect(top[1].name).toBe("Kopi");
+  expect(top[1].qtySold).toBe(2);
+  await db2.$disconnect();
+});
+
+test("getInventoryStatus mengklasifikasi stok pada batas ambang", async () => {
+  const db3 = freshDb("test-inventory.db");
+  await createProduct(db3, { name: "Habis", price: 1000, stock: 0 });
+  await createProduct(db3, { name: "Menipis", price: 1000, stock: 10 });
+  await createProduct(db3, { name: "Aman", price: 1000, stock: 11 });
+  const inv = await getInventoryStatus(db3, 10);
+  expect(inv.out).toBe(1);
+  expect(inv.low).toBe(1);
+  expect(inv.available).toBe(1);
+  expect(inv.total).toBe(3);
+  await db3.$disconnect();
 });
