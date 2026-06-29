@@ -3,9 +3,10 @@ import type { PrismaClient, Product } from "@prisma/client";
 type CreateInput = { name: string; price: number; stock?: number; sku?: string; category?: string };
 type UpdateInput = Partial<{ name: string; price: number; stock: number; sku: string; category: string; isActive: boolean }>;
 
-function validate(input: { name?: string; price?: number }) {
+function validate(input: { name?: string; price?: number; stock?: number }) {
   if (input.name !== undefined && input.name.trim() === "") throw new Error("Nama wajib diisi");
   if (input.price !== undefined && input.price < 0) throw new Error("Harga tidak boleh negatif");
+  if (input.stock !== undefined && input.stock < 0) throw new Error("Stok tidak boleh negatif");
 }
 
 export function listProducts(db: PrismaClient, opts?: { activeOnly?: boolean }): Promise<Product[]> {

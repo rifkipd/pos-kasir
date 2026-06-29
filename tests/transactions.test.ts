@@ -44,3 +44,9 @@ test("menolak stok tidak cukup", async () => {
     createTransaction(db, { lines: [{ productId: kopiId, quantity: 999 }], paidAmount: 99999999 }),
   ).rejects.toThrow("Stok");
 });
+
+test("menolak jumlah pecahan (non-integer)", async () => {
+  await expect(
+    createTransaction(db, { lines: [{ productId: kopiId, quantity: 1.5 }], paidAmount: 99999999 }),
+  ).rejects.toThrow("Jumlah harus bilangan bulat positif");
+});

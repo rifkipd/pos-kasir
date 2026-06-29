@@ -89,6 +89,7 @@ export default function KasirPage() {
       paid,
       change,
       invoiceNo: tx.invoiceNo as string,
+      createdAt: tx.createdAt as string | undefined,
     };
 
     setPrintData(snapshot);  // commit snapshot → triggers useEffect → print
@@ -108,9 +109,9 @@ export default function KasirPage() {
           margin: "0 auto",
           padding: "32px 24px",
           display: "grid",
-          gridTemplateColumns: "1fr 360px",
           gap: "24px",
         }}
+        className="grid-cols-1 md:grid-cols-[1fr_360px]"
       >
         {/* Product grid */}
         <section>
@@ -144,6 +145,7 @@ export default function KasirPage() {
                 key={p.id}
                 onClick={() => addToCart(p)}
                 disabled={p.stock <= 0}
+                className="product-btn"
                 style={{
                   border: "1px solid var(--line)",
                   borderRadius: "8px",
@@ -153,15 +155,6 @@ export default function KasirPage() {
                   cursor: p.stock <= 0 ? "not-allowed" : "pointer",
                   opacity: p.stock <= 0 ? 0.4 : 1,
                   transition: "border-color 0.15s",
-                }}
-                onMouseEnter={(e) => {
-                  if (p.stock > 0)
-                    (e.currentTarget as HTMLButtonElement).style.borderColor =
-                      "var(--accent)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor =
-                    "var(--line)";
                 }}
               >
                 <div

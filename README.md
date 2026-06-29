@@ -47,6 +47,9 @@ SESSION_PASSWORD="minimal 32 karakter acak"
 `SESSION_PASSWORD` wajib diisi dengan string acak minimal 32 karakter
 (dipakai untuk mengenkripsi cookie sesi).
 
+**Perhatian:** Jangan gunakan nilai placeholder dari `.env.example` di lingkungan nyata.
+Buat secret acak sendiri, misalnya: `openssl rand -hex 32`.
+
 ## Perintah
 
 ```bash

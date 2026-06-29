@@ -18,7 +18,7 @@ export async function createTransaction(db: PrismaClient, input: Input): Promise
     for (const line of input.lines) {
       const product = await tx.product.findUnique({ where: { id: line.productId } });
       if (!product) throw new Error(`Produk ${line.productId} tidak ditemukan`);
-      if (line.quantity <= 0) throw new Error("Jumlah harus lebih dari 0");
+      if (!Number.isInteger(line.quantity) || line.quantity <= 0) throw new Error("Jumlah harus bilangan bulat positif");
       if (product.stock < line.quantity) throw new Error(`Stok ${product.name} tidak cukup`);
       const subtotal = product.price * line.quantity;
       total += subtotal;

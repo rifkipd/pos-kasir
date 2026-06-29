@@ -7,12 +7,13 @@ export type ReceiptData = {
   paid: number;
   change: number;
   invoiceNo: string;
+  createdAt?: string;
 };
 
 export function Receipt({ data }: { data: ReceiptData | null }) {
   if (!data) return <div id="receipt" style={{ display: "none" }} />;
 
-  const { lines, total, paid, change, invoiceNo } = data;
+  const { lines, total, paid, change, invoiceNo, createdAt } = data;
 
   return (
     <div
@@ -27,7 +28,7 @@ export function Receipt({ data }: { data: ReceiptData | null }) {
     >
       <div style={{ textAlign: "center", fontWeight: 700 }}>TOKO SAYA</div>
       <div style={{ textAlign: "center" }}>
-        {new Date().toLocaleString("id-ID")}
+        {createdAt ? new Date(createdAt).toLocaleString("id-ID") : new Date().toLocaleString("id-ID")}
       </div>
       <div>{invoiceNo}</div>
       <hr />

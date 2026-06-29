@@ -28,6 +28,10 @@ test("updateProduct mengubah harga", async () => {
   expect(u.price).toBe(9000);
 });
 
+test("createProduct menolak stok negatif", async () => {
+  await expect(createProduct(db, { name: "X", price: 1, stock: -1 })).rejects.toThrow("Stok tidak boleh negatif");
+});
+
 test("deleteProduct = soft delete (activeOnly menyembunyikan)", async () => {
   const p = await createProduct(db, { name: "Roti", price: 8000 });
   await deleteProduct(db, p.id);

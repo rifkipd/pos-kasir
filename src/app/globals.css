@@ -20,6 +20,10 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
+.product-btn:not(:disabled):hover {
+  border-color: var(--accent);
+}
+
 @media print {
   body * {
     visibility: hidden;
