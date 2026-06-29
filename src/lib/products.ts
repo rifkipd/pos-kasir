@@ -28,9 +28,10 @@ export async function createProduct(db: PrismaClient, input: CreateInput): Promi
   });
 }
 
-export function updateProduct(db: PrismaClient, id: number, input: UpdateInput): Promise<Product> {
+export async function updateProduct(db: PrismaClient, id: number, input: UpdateInput): Promise<Product> {
   validate(input);
-  return db.product.update({ where: { id }, data: input });
+  const data = input.name !== undefined ? { ...input, name: input.name.trim() } : input;
+  return db.product.update({ where: { id }, data });
 }
 
 export async function deleteProduct(db: PrismaClient, id: number): Promise<void> {
