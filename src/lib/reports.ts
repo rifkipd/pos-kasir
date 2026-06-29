@@ -22,8 +22,10 @@ export async function getDailySales(db: PrismaClient, range?: Range) {
     select: { createdAt: true, totalAmount: true },
   });
   const byDay = new Map<string, number>();
+  // Group by local date in Asia/Jakarta (WIB, UTC+7) — Indonesian POS assumption
+  const fmt = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" });
   for (const r of rows) {
-    const key = r.createdAt.toISOString().slice(0, 10);
+    const key = fmt.format(r.createdAt); // YYYY-MM-DD in WIB
     byDay.set(key, (byDay.get(key) ?? 0) + r.totalAmount);
   }
   return [...byDay.entries()]
