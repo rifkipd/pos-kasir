@@ -100,230 +100,111 @@ export default function KasirPage() {
   }
 
   return (
-    <>
-      <main
-        style={{
-          maxWidth: "1152px",
-          margin: "0 auto",
-          padding: "32px 24px",
-          display: "grid",
-          gap: "24px",
-        }}
-        className="grid-cols-1 md:grid-cols-[1fr_360px]"
-      >
-        {/* Product grid */}
-        <section>
-          <h1
-            style={{
-              fontSize: "22px",
-              fontWeight: 600,
-              letterSpacing: "-0.02em",
-              color: "var(--ink)",
-              marginBottom: "20px",
-            }}
-          >
-            Kasir
-          </h1>
+    <main>
+      <div className="mx-auto max-w-7xl">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_360px] gap-6">
 
-          {products.length === 0 && (
-            <p style={{ color: "var(--muted)", fontSize: "14px" }}>
-              Memuat produk...
-            </p>
-          )}
+          {/* Product grid */}
+          <section>
+            <h1 className="text-[22px] font-semibold tracking-tight text-[var(--ink)] mb-5">
+              Kasir
+            </h1>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
-              gap: "12px",
-            }}
-          >
-            {products.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => addToCart(p)}
-                disabled={p.stock <= 0}
-                className="product-btn"
-                style={{
-                  border: "1px solid var(--line)",
-                  borderRadius: "8px",
-                  background: "var(--surface)",
-                  padding: "16px",
-                  textAlign: "left",
-                  cursor: p.stock <= 0 ? "not-allowed" : "pointer",
-                  opacity: p.stock <= 0 ? 0.4 : 1,
-                  transition: "border-color 0.15s",
-                }}
-              >
-                <div
-                  style={{
-                    fontWeight: 500,
-                    color: "var(--ink)",
-                    marginBottom: "4px",
-                    fontSize: "14px",
-                  }}
+            {products.length === 0 && (
+              <p className="text-sm text-[var(--muted)]">Memuat produk...</p>
+            )}
+
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">
+              {products.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => addToCart(p)}
+                  disabled={p.stock <= 0}
+                  className="rounded-xl border border-[var(--line)] bg-[var(--card)] p-4 elev-1 text-left transition-colors hover:border-[var(--primary)] disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {p.name}
-                </div>
-                <div style={{ fontSize: "13px", color: "var(--muted)" }}>
-                  {formatRupiah(p.price)}
-                </div>
-                <div style={{ fontSize: "12px", color: "var(--muted)", marginTop: "2px" }}>
-                  Stok: {p.stock}
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* Cart aside */}
-        <aside
-          style={{
-            border: "1px solid var(--line)",
-            borderRadius: "10px",
-            background: "var(--surface)",
-            padding: "20px",
-            alignSelf: "start",
-          }}
-        >
-          <h2
-            style={{
-              fontWeight: 600,
-              fontSize: "15px",
-              color: "var(--ink)",
-              marginBottom: "12px",
-            }}
-          >
-            Keranjang
-          </h2>
-
-          {lines.length === 0 && (
-            <p style={{ fontSize: "13px", color: "var(--muted)" }}>
-              Belum ada item
-            </p>
-          )}
-
-          {lines.map((l) => (
-            <div
-              key={l.productId}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "6px 0",
-                fontSize: "13px",
-                color: "var(--ink)",
-              }}
-            >
-              <span style={{ flex: 1 }}>
-                {l.name} x{l.quantity}
-              </span>
-              <span style={{ marginRight: "8px" }}>
-                {formatRupiah(l.price * l.quantity)}
-              </span>
-              <button
-                onClick={() => removeFromCart(l.productId)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#b91c1c",
-                  cursor: "pointer",
-                  fontSize: "12px",
-                  padding: "0 2px",
-                }}
-              >
-                X
-              </button>
+                  <div className="font-medium text-[var(--ink)] mb-1 text-sm">
+                    {p.name}
+                  </div>
+                  <div className="text-[13px] text-[var(--muted)]">
+                    {formatRupiah(p.price)}
+                  </div>
+                  <div className="text-xs text-[var(--muted)] mt-0.5">
+                    Stok: {p.stock}
+                  </div>
+                </button>
+              ))}
             </div>
-          ))}
+          </section>
 
-          {/* Total */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              borderTop: "1px solid var(--line)",
-              paddingTop: "12px",
-              marginTop: "8px",
-              fontWeight: 600,
-              fontSize: "14px",
-              color: "var(--ink)",
-            }}
-          >
-            <span>Total</span>
-            <span>{formatRupiah(total)}</span>
-          </div>
+          {/* Cart aside */}
+          <aside className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-5 elev-1 self-start">
+            <h2 className="font-semibold text-[var(--ink)] mb-3 text-[15px]">
+              Keranjang
+            </h2>
 
-          {/* Paid input */}
-          <label
-            style={{
-              display: "block",
-              fontSize: "12px",
-              color: "var(--muted)",
-              marginTop: "16px",
-              marginBottom: "4px",
-            }}
-          >
-            Bayar
-          </label>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={paidText}
-            onChange={(e) => setPaidText(e.target.value)}
-            placeholder="0"
-            style={{
-              width: "100%",
-              border: "1px solid var(--line)",
-              borderRadius: "6px",
-              padding: "8px 12px",
-              fontSize: "14px",
-              color: "var(--ink)",
-              background: "var(--surface)",
-              boxSizing: "border-box",
-              outline: "none",
-            }}
-          />
+            {lines.length === 0 && (
+              <p className="text-[13px] text-[var(--muted)]">Belum ada item</p>
+            )}
 
-          {/* Change */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginTop: "8px",
-              fontSize: "13px",
-              color: "var(--muted)",
-            }}
-          >
-            <span>Kembali</span>
-            <span>{formatRupiah(change)}</span>
-          </div>
+            {lines.map((l) => (
+              <div
+                key={l.productId}
+                className="flex justify-between items-center py-1.5 text-[13px] text-[var(--ink)]"
+              >
+                <span className="flex-1">
+                  {l.name} x{l.quantity}
+                </span>
+                <span className="mr-2">
+                  {formatRupiah(l.price * l.quantity)}
+                </span>
+                <button
+                  onClick={() => removeFromCart(l.productId)}
+                  className="text-[var(--error)] text-xs px-0.5 bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
+                >
+                  X
+                </button>
+              </div>
+            ))}
 
-          {/* Pay button */}
-          <button
-            onClick={pay}
-            disabled={!canPay}
-            style={{
-              marginTop: "16px",
-              width: "100%",
-              background: canPay ? "var(--accent)" : "var(--line)",
-              color: canPay ? "#ffffff" : "var(--muted)",
-              border: "none",
-              borderRadius: "6px",
-              padding: "10px 0",
-              fontSize: "14px",
-              fontWeight: 500,
-              cursor: canPay ? "pointer" : "not-allowed",
-              transition: "background 0.15s",
-            }}
-          >
-            Bayar & Cetak
-          </button>
-        </aside>
-      </main>
+            {/* Total */}
+            <div className="flex justify-between border-t border-[var(--line)] pt-3 mt-2 font-semibold text-sm text-[var(--ink)]">
+              <span>Total</span>
+              <span>{formatRupiah(total)}</span>
+            </div>
+
+            {/* Paid input */}
+            <label className="block text-xs text-[var(--muted)] mt-4 mb-1">
+              Bayar
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={paidText}
+              onChange={(e) => setPaidText(e.target.value)}
+              placeholder="0"
+              className="w-full rounded-lg border border-[var(--line)] focus:border-[var(--primary)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] outline-none transition-colors box-border"
+            />
+
+            {/* Change */}
+            <div className="flex justify-between mt-2 text-[13px] text-[var(--muted)]">
+              <span>Kembali</span>
+              <span>{formatRupiah(change)}</span>
+            </div>
+
+            {/* Pay button */}
+            <button
+              onClick={pay}
+              disabled={!canPay}
+              className="mt-4 w-full bg-[var(--secondary)] text-white rounded-lg py-2.5 text-sm font-medium cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+            >
+              Bayar & Cetak
+            </button>
+          </aside>
+        </div>
+      </div>
 
       {/* Receipt renders from printData snapshot, not live cart state */}
       <Receipt data={printData} />
-    </>
+    </main>
   );
 }
