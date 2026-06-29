@@ -27,7 +27,7 @@ export function AppNav() {
         POS
       </span>
       {navItems.map((item) => {
-        const isActive = pathname?.startsWith(item.href);
+        const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
         return (
           <Link
             key={item.href}
@@ -47,15 +47,7 @@ export function AppNav() {
       <form action="/api/logout" method="post" className="ml-auto">
         <button
           type="submit"
-          className="text-sm transition-colors"
-          style={{ color: "var(--muted)" }}
-          onMouseEnter={(e) =>
-            ((e.currentTarget as HTMLButtonElement).style.color = "var(--ink)")
-          }
-          onMouseLeave={(e) =>
-            ((e.currentTarget as HTMLButtonElement).style.color =
-              "var(--muted)")
-          }
+          className="text-sm transition-colors hover:text-[var(--ink)] text-[var(--muted)]"
         >
           Keluar
         </button>
