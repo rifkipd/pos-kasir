@@ -4,8 +4,13 @@ import { verifyCredentials } from "@/lib/auth";
 import { getSession } from "@/lib/session";
 
 export async function POST(req: Request) {
-  const { username, password } = await req.json();
-  const user = await verifyCredentials(prisma, username ?? "", password ?? "");
+  let body: { username?: string; password?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Body tidak valid" }, { status: 400 });
+  }
+  const user = await verifyCredentials(prisma, body.username ?? "", body.password ?? "");
   if (!user) return NextResponse.json({ error: "Login gagal" }, { status: 401 });
   const session = await getSession();
   session.userId = user.id;

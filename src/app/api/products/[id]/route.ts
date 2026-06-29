@@ -13,6 +13,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  await deleteProduct(prisma, Number(id));
-  return NextResponse.json({ ok: true });
+  try {
+    await deleteProduct(prisma, Number(id));
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+  }
 }
