@@ -27,7 +27,7 @@ export default function LoginPage() {
     >
       <form
         onSubmit={submit}
-        className="w-full max-w-sm rounded-lg border bg-[var(--surface)] p-8"
+        className="w-full max-w-sm rounded-2xl border bg-[var(--surface)] p-8 elev-1"
         style={{ borderColor: "var(--line)" }}
       >
         <h1 className="mb-6 text-xl font-semibold tracking-tight" style={{ color: "var(--ink)" }}>
@@ -41,7 +41,7 @@ export default function LoginPage() {
           value={username}
           onChange={(e) => setU(e.target.value)}
           autoComplete="username"
-          className="mb-4 w-full rounded border px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+          className="mb-4 w-full rounded border px-3 py-2 text-sm outline-none focus:border-[var(--primary)]"
           style={{ borderColor: "var(--line)", color: "var(--ink)", background: "var(--surface)" }}
         />
 
@@ -53,20 +53,20 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setP(e.target.value)}
           autoComplete="current-password"
-          className="mb-4 w-full rounded border px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+          className="mb-4 w-full rounded border px-3 py-2 text-sm outline-none focus:border-[var(--primary)]"
           style={{ borderColor: "var(--line)", color: "var(--ink)", background: "var(--surface)" }}
         />
 
         {err && (
-          <p className="mb-4 text-sm" style={{ color: "#c0392b" }}>
+          <p className="mb-4 text-sm" style={{ color: "var(--error)" }}>
             {err}
           </p>
         )}
 
         <button
           type="submit"
-          className="w-full rounded py-2 text-sm font-medium text-white"
-          style={{ background: "var(--accent)" }}
+          className="w-full rounded py-2 text-sm font-medium text-white hover:bg-[var(--primary-container)]"
+          style={{ background: "var(--primary)" }}
         >
           Masuk
         </button>
