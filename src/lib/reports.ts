@@ -33,11 +33,12 @@ export async function getDailySales(db: PrismaClient, range?: Range) {
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-export function listTransactions(db: PrismaClient, range?: Range): Promise<TransactionWithItems[]> {
+export function listTransactions(db: PrismaClient, range?: Range, limit?: number): Promise<TransactionWithItems[]> {
   return db.transaction.findMany({
     where: where(range),
     include: { items: true },
     orderBy: { createdAt: "desc" },
+    ...(limit !== undefined ? { take: limit } : {}),
   });
 }
 

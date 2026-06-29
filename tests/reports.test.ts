@@ -115,6 +115,35 @@ test("getBestSellers mengurutkan berdasarkan qty terjual", async () => {
   await db2.$disconnect();
 });
 
+test("listTransactions: limit returns at most N rows (newest first)", async () => {
+  const db4 = freshDb("test-limit.db");
+  const prod = await createProduct(db4, { name: "Item", price: 5000, stock: 100 });
+  const t1 = await createTransaction(db4, { lines: [{ productId: prod.id, quantity: 1 }], paidAmount: 5000 });
+  const t2 = await createTransaction(db4, { lines: [{ productId: prod.id, quantity: 2 }], paidAmount: 10000 });
+  // Make t2 newer
+  await db4.transaction.update({ where: { id: t1.id }, data: { createdAt: new Date("2026-06-20T03:00:00Z") } });
+  await db4.transaction.update({ where: { id: t2.id }, data: { createdAt: new Date("2026-06-22T03:00:00Z") } });
+  const list = await listTransactions(db4, undefined, 1);
+  expect(list).toHaveLength(1);
+  expect(list[0].id).toBe(t2.id); // newest should be returned
+  await db4.$disconnect();
+});
+
+test("getBestSellers: range filter only counts transactions within range", async () => {
+  const db5 = freshDb("test-bestsellers-range.db");
+  const prod = await createProduct(db5, { name: "Barang", price: 3000, stock: 100 });
+  const t1 = await createTransaction(db5, { lines: [{ productId: prod.id, quantity: 3 }], paidAmount: 9000 });
+  const t2 = await createTransaction(db5, { lines: [{ productId: prod.id, quantity: 7 }], paidAmount: 21000 });
+  // t1 → before range, t2 → inside range
+  await db5.transaction.update({ where: { id: t1.id }, data: { createdAt: new Date("2026-06-20T03:00:00Z") } });
+  await db5.transaction.update({ where: { id: t2.id }, data: { createdAt: new Date("2026-06-22T03:00:00Z") } });
+  const top = await getBestSellers(db5, { from: new Date("2026-06-21T00:00:00Z") });
+  expect(top).toHaveLength(1);
+  expect(top[0].productId).toBe(prod.id);
+  expect(top[0].qtySold).toBe(7); // only t2's qty; t1 is out of range
+  await db5.$disconnect();
+});
+
 test("getInventoryStatus mengklasifikasi stok pada batas ambang", async () => {
   const db3 = freshDb("test-inventory.db");
   await createProduct(db3, { name: "Habis", price: 1000, stock: 0 });

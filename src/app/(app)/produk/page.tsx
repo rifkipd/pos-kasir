@@ -43,7 +43,7 @@ export default function ProdukPage() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl space-y-6 px-6 py-8">
+    <div className="mx-auto max-w-6xl space-y-6">
       <h1 className="text-2xl font-bold text-[var(--ink)]">Produk</h1>
 
       <ProductForm onSubmit={add} />
@@ -89,6 +89,6 @@ export default function ProdukPage() {
           </tbody>
         </table>
       </div>
-    </main>
+    </div>
   );
 }

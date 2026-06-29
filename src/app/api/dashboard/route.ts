@@ -14,17 +14,17 @@ export async function GET() {
   try {
     const todayRange = { from: wibDayStart(0), to: new Date() };
     const weekRange = { from: wibDayStart(6), to: new Date() };
-    const [today, daily, recentAll, bestSellers, inventory] = await Promise.all([
+    const [today, daily, recent, bestSellers, inventory] = await Promise.all([
       getSummary(prisma, todayRange),
       getDailySales(prisma, weekRange),
-      listTransactions(prisma),
+      listTransactions(prisma, undefined, 5),
       getBestSellers(prisma, undefined, 5),
       getInventoryStatus(prisma),
     ]);
     return NextResponse.json({
       today,
       daily,
-      recent: recentAll.slice(0, 5),
+      recent,
       bestSellers,
       inventory,
     });
