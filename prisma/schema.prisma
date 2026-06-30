@@ -11,6 +11,7 @@ model Product {
   name      String
   sku       String?  @unique
   price     Int
+  costPrice Int      @default(0)
   stock     Int      @default(0)
   category  String?
   imageUrl  String?
@@ -20,14 +21,16 @@ model Product {
 }
 
 model Transaction {
-  id            Int      @id @default(autoincrement())
-  invoiceNo     String   @unique
-  createdAt     DateTime @default(now())
-  totalAmount   Int
-  paidAmount    Int
-  changeAmount  Int
-  paymentMethod String   @default("cash")
-  items         TransactionItem[]
+  id             Int      @id @default(autoincrement())
+  invoiceNo      String   @unique
+  createdAt      DateTime @default(now())
+  subtotalAmount Int      @default(0)
+  discountAmount Int      @default(0)
+  totalAmount    Int
+  paidAmount     Int
+  changeAmount   Int
+  paymentMethod  String   @default("cash")
+  items          TransactionItem[]
 }
 
 model TransactionItem {
@@ -36,6 +39,7 @@ model TransactionItem {
   productId     Int
   quantity      Int
   priceAtSale   Int
+  costAtSale    Int         @default(0)
   subtotal      Int
   transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
   product       Product     @relation(fields: [productId], references: [id])
@@ -45,4 +49,15 @@ model User {
   id           Int    @id @default(autoincrement())
   username     String @unique
   passwordHash String
+  role         String @default("admin")
+}
+
+model Settings {
+  id            Int     @id @default(1)
+  storeName     String?
+  address       String?
+  phone         String?
+  receiptFooter String?
+  logoUrl       String?
+  qrisImageUrl  String?
 }
