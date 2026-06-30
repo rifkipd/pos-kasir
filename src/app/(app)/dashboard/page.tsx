@@ -13,7 +13,7 @@ import { StatusChip } from "@/app/components/ui/StatusChip";
 import { formatRupiah } from "@/lib/money";
 
 type Dash = {
-  today: { totalSales: number; transactionCount: number };
+  today: { totalSales: number; transactionCount: number; totalProfit: number };
   daily: { date: string; total: number }[];
   recent: {
     id: number;
@@ -40,7 +40,7 @@ export default function DashboardPage() {
       .catch(() => setD(null));
   }, []);
 
-  const today = d?.today ?? { totalSales: 0, transactionCount: 0 };
+  const today = d?.today ?? { totalSales: 0, transactionCount: 0, totalProfit: 0 };
   const inv = d?.inventory ?? { available: 0, low: 0, out: 0, total: 0 };
 
   return (
@@ -57,14 +57,14 @@ export default function DashboardPage() {
           icon="payments"
         />
         <StatCard
+          label="Laba Hari Ini"
+          value={formatRupiah(today.totalProfit ?? 0)}
+          icon="trending_up"
+        />
+        <StatCard
           label="Transaksi Hari Ini"
           value={String(today.transactionCount)}
           icon="receipt_long"
-        />
-        <StatCard
-          label="Produk Aktif"
-          value={String(inv.total)}
-          icon="inventory_2"
         />
         <StatCard
           label="Stok Tipis"

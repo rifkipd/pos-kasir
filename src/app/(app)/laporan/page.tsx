@@ -11,12 +11,12 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-type Summary = { totalSales: number; transactionCount: number };
+type Summary = { totalSales: number; transactionCount: number; totalProfit: number };
 type Daily = { date: string; total: number };
 type Tx = { id: number; invoiceNo: string; createdAt: string; totalAmount: number };
 
 export default function LaporanPage() {
-  const [summary, setSummary] = useState<Summary>({ totalSales: 0, transactionCount: 0 });
+  const [summary, setSummary] = useState<Summary>({ totalSales: 0, transactionCount: 0, totalProfit: 0 });
   const [daily, setDaily] = useState<Daily[]>([]);
   const [txs, setTxs] = useState<Tx[]>([]);
 
@@ -37,11 +37,16 @@ export default function LaporanPage() {
       <h1 className="text-2xl font-bold text-[var(--ink)]">Laporan</h1>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
           label="Total Penjualan"
           value={formatRupiah(summary.totalSales)}
           icon="payments"
+        />
+        <StatCard
+          label="Laba"
+          value={formatRupiah(summary.totalProfit ?? 0)}
+          icon="trending_up"
         />
         <StatCard
           label="Jumlah Transaksi"
