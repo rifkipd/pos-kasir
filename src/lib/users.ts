@@ -18,6 +18,7 @@ export async function createUser(
   db: PrismaClient,
   input: { username: string; password: string; role?: string }
 ): Promise<SafeUser> {
+  if (!input.password) throw new Error("Password wajib diisi");
   validate(input.username, input.password);
   return db.user.create({
     data: {
