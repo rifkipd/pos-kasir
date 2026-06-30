@@ -3,7 +3,7 @@ import type { PrismaClient } from "@prisma/client";
 import { freshDb } from "./helpers/db";
 import { createProduct } from "@/lib/products";
 import { createTransaction } from "@/lib/transactions";
-import { getSummary, getDailySales, listTransactions } from "@/lib/reports";
+import { getSummary, getDailySales, listTransactions, getBestSellers, getInventoryStatus } from "@/lib/reports";
 
 let db: PrismaClient;
 let tx1Id: number;
@@ -99,4 +99,82 @@ test("listTransactions: range filter excludes out-of-range transactions", async 
   // Only tx2 is in range
   expect(list).toHaveLength(1);
   expect(list[0].id).toBe(tx2Id);
+});
+
+test("getBestSellers mengurutkan berdasarkan qty terjual", async () => {
+  const db2 = freshDb("test-bestsellers.db");
+  const kopi = await createProduct(db2, { name: "Kopi", price: 10000, stock: 100 });
+  const teh = await createProduct(db2, { name: "Teh", price: 8000, stock: 100 });
+  await createTransaction(db2, { lines: [{ productId: kopi.id, quantity: 2 }], paidAmount: 20000 });
+  await createTransaction(db2, { lines: [{ productId: teh.id, quantity: 5 }], paidAmount: 40000 });
+  const top = await getBestSellers(db2);
+  expect(top[0].name).toBe("Teh");
+  expect(top[0].qtySold).toBe(5);
+  expect(top[1].name).toBe("Kopi");
+  expect(top[1].qtySold).toBe(2);
+  await db2.$disconnect();
+});
+
+test("listTransactions: limit returns at most N rows (newest first)", async () => {
+  const db4 = freshDb("test-limit.db");
+  const prod = await createProduct(db4, { name: "Item", price: 5000, stock: 100 });
+  const t1 = await createTransaction(db4, { lines: [{ productId: prod.id, quantity: 1 }], paidAmount: 5000 });
+  const t2 = await createTransaction(db4, { lines: [{ productId: prod.id, quantity: 2 }], paidAmount: 10000 });
+  // Make t2 newer
+  await db4.transaction.update({ where: { id: t1.id }, data: { createdAt: new Date("2026-06-20T03:00:00Z") } });
+  await db4.transaction.update({ where: { id: t2.id }, data: { createdAt: new Date("2026-06-22T03:00:00Z") } });
+  const list = await listTransactions(db4, undefined, 1);
+  expect(list).toHaveLength(1);
+  expect(list[0].id).toBe(t2.id); // newest should be returned
+  await db4.$disconnect();
+});
+
+test("getBestSellers: range filter only counts transactions within range", async () => {
+  const db5 = freshDb("test-bestsellers-range.db");
+  const prod = await createProduct(db5, { name: "Barang", price: 3000, stock: 100 });
+  const t1 = await createTransaction(db5, { lines: [{ productId: prod.id, quantity: 3 }], paidAmount: 9000 });
+  const t2 = await createTransaction(db5, { lines: [{ productId: prod.id, quantity: 7 }], paidAmount: 21000 });
+  // t1 → before range, t2 → inside range
+  await db5.transaction.update({ where: { id: t1.id }, data: { createdAt: new Date("2026-06-20T03:00:00Z") } });
+  await db5.transaction.update({ where: { id: t2.id }, data: { createdAt: new Date("2026-06-22T03:00:00Z") } });
+  const top = await getBestSellers(db5, { from: new Date("2026-06-21T00:00:00Z") });
+  expect(top).toHaveLength(1);
+  expect(top[0].productId).toBe(prod.id);
+  expect(top[0].qtySold).toBe(7); // only t2's qty; t1 is out of range
+  await db5.$disconnect();
+});
+
+test("getInventoryStatus mengklasifikasi stok pada batas ambang", async () => {
+  const db3 = freshDb("test-inventory.db");
+  await createProduct(db3, { name: "Habis", price: 1000, stock: 0 });
+  await createProduct(db3, { name: "Menipis", price: 1000, stock: 10 });
+  await createProduct(db3, { name: "Aman", price: 1000, stock: 11 });
+  const inv = await getInventoryStatus(db3, 10);
+  expect(inv.out).toBe(1);
+  expect(inv.low).toBe(1);
+  expect(inv.available).toBe(1);
+  expect(inv.total).toBe(3);
+  await db3.$disconnect();
+});
+
+test("getSummary menghitung laba = pendapatan - modal", async () => {
+  const db5 = freshDb("test-profit.db");
+  const p = await createProduct(db5, { name: "Kopi", price: 10000, stock: 10, costPrice: 4000 });
+  await createTransaction(db5, { lines: [{ productId: p.id, quantity: 2 }], paidAmount: 20000 });
+  // pendapatan 20000, modal 4000*2=8000 -> laba 12000
+  const s = await getSummary(db5);
+  expect(s.totalSales).toBe(20000);
+  expect(s.totalProfit).toBe(12000);
+  await db5.$disconnect();
+});
+
+test("getSummary: laba memperhitungkan diskon", async () => {
+  const db6 = freshDb("test-profit-disc.db");
+  const p = await createProduct(db6, { name: "Kopi", price: 10000, stock: 10, costPrice: 4000 });
+  await createTransaction(db6, { lines: [{ productId: p.id, quantity: 1 }], paidAmount: 10000, discount: { type: "amount", value: 2000 } });
+  // total final 8000, modal 4000 -> laba 4000
+  const s = await getSummary(db6);
+  expect(s.totalSales).toBe(8000);
+  expect(s.totalProfit).toBe(4000);
+  await db6.$disconnect();
 });

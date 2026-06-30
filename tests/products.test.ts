@@ -14,6 +14,13 @@ test("createProduct lalu listProducts", async () => {
   expect(all.find((x) => x.id === p.id)?.name).toBe("Kopi");
 });
 
+test("createProduct menyimpan imageUrl", async () => {
+  const p = await createProduct(db, { name: "Roti", price: 5000, imageUrl: "https://example.com/roti.jpg" });
+  expect(p.imageUrl).toBe("https://example.com/roti.jpg");
+  const blank = await createProduct(db, { name: "Tanpa Gambar", price: 5000 });
+  expect(blank.imageUrl).toBeNull();
+});
+
 test("createProduct menolak harga negatif", async () => {
   await expect(createProduct(db, { name: "X", price: -1 })).rejects.toThrow("Harga tidak boleh negatif");
 });
@@ -37,4 +44,11 @@ test("deleteProduct = soft delete (activeOnly menyembunyikan)", async () => {
   await deleteProduct(db, p.id);
   const active = await listProducts(db, { activeOnly: true });
   expect(active.find((x) => x.id === p.id)).toBeUndefined();
+});
+
+test("createProduct menyimpan costPrice", async () => {
+  const p = await createProduct(db, { name: "Kopi Modal", price: 10000, costPrice: 4000 });
+  expect(p.costPrice).toBe(4000);
+  const def = await createProduct(db, { name: "Tanpa Modal", price: 10000 });
+  expect(def.costPrice).toBe(0);
 });

@@ -1,23 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #faf9f7;
+  /* Stitch palette (nama lama dipertahankan utk kompatibilitas) */
+  --bg: #f9f9ff;
   --surface: #ffffff;
-  --ink: #1a1a1a;
-  --muted: #6b6b6b;
-  --line: #e7e4df;
-  --accent: #2f6f4f;
+  --card: #ffffff;
+  --surface-container: #e7eeff;
+  --ink: #111c2d;
+  --muted: #454652;
+  --line: #c5c5d4;
+  --accent: #24389c;
+  --primary: #24389c;
+  --primary-container: #3f51b5;
+  --secondary: #006c49;
+  --success: #10b981;
+  --tertiary: #805000;
+  --tertiary-container: #ffb95f;
+  --error: #ba1a1a;
 }
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-mono-stitch);
 }
 
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
 }
 
 .product-btn:not(:disabled):hover {
@@ -39,3 +49,10 @@ body {
     top: 0;
   }
 }
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  line-height: 1;
+  user-select: none;
+}
+.elev-1 { box-shadow: 0 1px 4px rgba(17, 28, 45, 0.05); }

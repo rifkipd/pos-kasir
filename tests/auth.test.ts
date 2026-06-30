@@ -7,7 +7,7 @@ import { verifyCredentials } from "@/lib/auth";
 let db: PrismaClient;
 beforeAll(async () => {
   db = freshDb("test-auth.db");
-  await db.user.create({ data: { username: "admin", passwordHash: bcrypt.hashSync("admin123", 10) } });
+  await db.user.create({ data: { username: "admin", passwordHash: bcrypt.hashSync("admin123", 10), role: "admin" } });
 });
 afterAll(async () => { await db.$disconnect(); });
 
@@ -22,4 +22,9 @@ test("verifyCredentials menolak password salah", async () => {
 
 test("verifyCredentials menolak user tidak ada", async () => {
   expect(await verifyCredentials(db, "nobody", "x")).toBeNull();
+});
+
+test("verifyCredentials mengembalikan role", async () => {
+  const u = await verifyCredentials(db, "admin", "admin123");
+  expect(u?.role).toBe("admin");
 });

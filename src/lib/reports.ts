@@ -9,10 +9,20 @@ function where(range?: Range) {
 }
 
 export async function getSummary(db: PrismaClient, range?: Range) {
-  const rows = await db.transaction.findMany({ where: where(range), select: { totalAmount: true } });
+  const rows = await db.transaction.findMany({
+    where: where(range),
+    select: { totalAmount: true, items: { select: { quantity: true, costAtSale: true } } },
+  });
+  let totalSales = 0;
+  let totalCost = 0;
+  for (const r of rows) {
+    totalSales += r.totalAmount;
+    for (const it of r.items) totalCost += it.costAtSale * it.quantity;
+  }
   return {
-    totalSales: rows.reduce((a, r) => a + r.totalAmount, 0),
+    totalSales,
     transactionCount: rows.length,
+    totalProfit: totalSales - totalCost,
   };
 }
 
@@ -33,10 +43,50 @@ export async function getDailySales(db: PrismaClient, range?: Range) {
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-export function listTransactions(db: PrismaClient, range?: Range): Promise<TransactionWithItems[]> {
+export function listTransactions(db: PrismaClient, range?: Range, limit?: number): Promise<TransactionWithItems[]> {
   return db.transaction.findMany({
     where: where(range),
     include: { items: true },
     orderBy: { createdAt: "desc" },
+    ...(limit !== undefined ? { take: limit } : {}),
   });
+}
+
+export const LOW_STOCK_THRESHOLD = 10;
+
+export async function getBestSellers(
+  db: PrismaClient,
+  range?: Range,
+  limit = 5,
+): Promise<{ productId: number; name: string; price: number; qtySold: number }[]> {
+  const items = await db.transactionItem.findMany({
+    where: range && (range.from || range.to)
+      ? { transaction: { createdAt: { gte: range.from, lte: range.to } } }
+      : undefined,
+    select: { productId: true, quantity: true, product: { select: { name: true, price: true } } },
+  });
+  const agg = new Map<number, { name: string; price: number; qtySold: number }>();
+  for (const it of items) {
+    const cur = agg.get(it.productId) ?? { name: it.product.name, price: it.product.price, qtySold: 0 };
+    cur.qtySold += it.quantity;
+    agg.set(it.productId, cur);
+  }
+  return [...agg.entries()]
+    .map(([productId, v]) => ({ productId, ...v }))
+    .sort((a, b) => b.qtySold - a.qtySold)
+    .slice(0, limit);
+}
+
+export async function getInventoryStatus(
+  db: PrismaClient,
+  lowStockThreshold = LOW_STOCK_THRESHOLD,
+): Promise<{ available: number; low: number; out: number; total: number }> {
+  const products = await db.product.findMany({ where: { isActive: true }, select: { stock: true } });
+  let available = 0, low = 0, out = 0;
+  for (const p of products) {
+    if (p.stock <= 0) out++;
+    else if (p.stock <= lowStockThreshold) low++;
+    else available++;
+  }
+  return { available, low, out, total: products.length };
 }
