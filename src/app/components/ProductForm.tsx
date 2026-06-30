@@ -8,6 +8,7 @@ export type ProductInput = {
   sku?: string;
   category?: string;
   imageUrl?: string;
+  costPrice?: number;
 };
 
 const inputCls =
@@ -32,6 +33,7 @@ export function ProductForm({
   const [sku, setSku] = useState(initial?.sku ?? "");
   const [category, setCategory] = useState(initial?.category ?? "");
   const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
+  const [costPrice, setCostPrice] = useState(initial?.costPrice != null ? String(initial.costPrice) : "");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -47,6 +49,7 @@ export function ProductForm({
         sku: sku.trim() || undefined,
         category: category.trim() || undefined,
         imageUrl: imageUrl.trim() || undefined,
+        costPrice: Number(costPrice) || 0,
       });
       if (err) {
         setError(err);
@@ -59,6 +62,7 @@ export function ProductForm({
         setSku("");
         setCategory("");
         setImageUrl("");
+        setCostPrice("");
       }
       onSuccess?.();
     } finally {
@@ -72,10 +76,14 @@ export function ProductForm({
         <label className={labelCls}>Nama produk</label>
         <input value={name} onChange={(e) => setName(e.target.value)} required className={inputCls} placeholder="mis. Kopi Susu" />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <div>
           <label className={labelCls}>Harga (Rp)</label>
           <input value={price} onChange={(e) => setPrice(e.target.value)} type="number" min="0" className={inputCls} placeholder="0" />
+        </div>
+        <div>
+          <label className={labelCls}>Harga Modal (Rp)</label>
+          <input value={costPrice} onChange={(e) => setCostPrice(e.target.value)} type="number" min="0" className={inputCls} placeholder="0" />
         </div>
         <div>
           <label className={labelCls}>Stok</label>

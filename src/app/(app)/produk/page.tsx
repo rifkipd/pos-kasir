@@ -15,6 +15,7 @@ type Product = {
   sku?: string | null;
   category?: string | null;
   imageUrl?: string | null;
+  costPrice?: number | null;
 };
 
 const LOW_STOCK_THRESHOLD = 10;
@@ -279,6 +280,7 @@ export default function ProdukPage() {
               sku: editing.sku ?? undefined,
               category: editing.category ?? undefined,
               imageUrl: editing.imageUrl ?? undefined,
+              costPrice: editing.costPrice ?? undefined,
             }}
             submitLabel="Simpan Perubahan"
             onSubmit={(p) => editProduct(editing.id, p)}

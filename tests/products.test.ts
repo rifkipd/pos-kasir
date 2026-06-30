@@ -45,3 +45,10 @@ test("deleteProduct = soft delete (activeOnly menyembunyikan)", async () => {
   const active = await listProducts(db, { activeOnly: true });
   expect(active.find((x) => x.id === p.id)).toBeUndefined();
 });
+
+test("createProduct menyimpan costPrice", async () => {
+  const p = await createProduct(db, { name: "Kopi Modal", price: 10000, costPrice: 4000 });
+  expect(p.costPrice).toBe(4000);
+  const def = await createProduct(db, { name: "Tanpa Modal", price: 10000 });
+  expect(def.costPrice).toBe(0);
+});

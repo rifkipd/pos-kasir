@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { listProducts, createProduct } from "@/lib/products";
+import { requireAdmin } from "@/lib/session";
 
 export async function GET(req: Request) {
   const activeOnly = new URL(req.url).searchParams.get("activeOnly") === "1";
@@ -8,6 +9,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  if (!(await requireAdmin())) return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
   try {
     const body = await req.json();
     return NextResponse.json(await createProduct(prisma, body));
