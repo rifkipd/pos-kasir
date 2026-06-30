@@ -1,22 +1,32 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Icon } from "./ui/Icon";
 
 const nav = [
-  { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
-  { href: "/kasir", label: "Kasir", icon: "point_of_sale" },
-  { href: "/produk", label: "Produk", icon: "inventory_2" },
-  { href: "/laporan", label: "Laporan", icon: "bar_chart" },
+  { href: "/dashboard", label: "Dashboard", icon: "dashboard", adminOnly: true },
+  { href: "/kasir", label: "Kasir", icon: "point_of_sale", adminOnly: false },
+  { href: "/produk", label: "Produk", icon: "inventory_2", adminOnly: true },
+  { href: "/laporan", label: "Laporan", icon: "bar_chart", adminOnly: true },
+  { href: "/pengaturan", label: "Pengaturan", icon: "settings", adminOnly: true },
+  { href: "/pengguna", label: "Pengguna", icon: "group", adminOnly: true },
 ];
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const [role, setRole] = useState<string | null>(null);
+  useEffect(() => {
+    fetch("/api/me").then((r) => r.json()).then((d) => setRole(d.role)).catch(() => setRole(null));
+  }, []);
+  const isAdmin = role === "admin";
+  const items = nav.filter((it) => !it.adminOnly || isAdmin);
+
   return (
     <div className="flex h-full w-64 flex-col bg-[var(--surface)] border-r border-[var(--line)] p-4">
       <div className="px-2 py-3">
         <div className="text-xl font-extrabold tracking-tight text-[var(--ink)]">POS</div>
-        <div className="text-xs text-[var(--muted)]">Growth-Oriented</div>
+        <div className="text-xs text-[var(--muted)]">{isAdmin ? "Admin" : "Kasir"}</div>
       </div>
       <Link
         href="/kasir"
@@ -26,7 +36,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <Icon name="add" size={18} /> Transaksi Baru
       </Link>
       <nav className="flex flex-col gap-1">
-        {nav.map((it) => {
+        {items.map((it) => {
           const active = pathname === it.href || pathname?.startsWith(it.href + "/");
           return (
             <Link
