@@ -1,12 +1,13 @@
 import type { PrismaClient, Product } from "@prisma/client";
 
-type CreateInput = { name: string; price: number; stock?: number; sku?: string; category?: string; imageUrl?: string };
-type UpdateInput = Partial<{ name: string; price: number; stock: number; sku: string; category: string; imageUrl: string; isActive: boolean }>;
+type CreateInput = { name: string; price: number; stock?: number; sku?: string; category?: string; imageUrl?: string; costPrice?: number };
+type UpdateInput = Partial<{ name: string; price: number; stock: number; sku: string; category: string; imageUrl: string; isActive: boolean; costPrice: number }>;
 
-function validate(input: { name?: string; price?: number; stock?: number }) {
+function validate(input: { name?: string; price?: number; stock?: number; costPrice?: number }) {
   if (input.name !== undefined && input.name.trim() === "") throw new Error("Nama wajib diisi");
   if (input.price !== undefined && input.price < 0) throw new Error("Harga tidak boleh negatif");
   if (input.stock !== undefined && input.stock < 0) throw new Error("Stok tidak boleh negatif");
+  if (input.costPrice !== undefined && input.costPrice < 0) throw new Error("Harga modal tidak boleh negatif");
 }
 
 export function listProducts(db: PrismaClient, opts?: { activeOnly?: boolean }): Promise<Product[]> {
@@ -26,6 +27,7 @@ export async function createProduct(db: PrismaClient, input: CreateInput): Promi
       sku: input.sku || null,
       category: input.category || null,
       imageUrl: input.imageUrl || null,
+      costPrice: input.costPrice ?? 0,
     },
   });
 }
