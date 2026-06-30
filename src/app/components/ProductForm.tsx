@@ -10,16 +10,28 @@ export type ProductInput = {
   imageUrl?: string;
 };
 
+const inputCls =
+  "w-full rounded-lg border border-[var(--line)] px-3 py-2 text-sm text-[var(--ink)] bg-[var(--surface)] outline-none focus:border-[var(--primary)]";
+const labelCls = "mb-1 block text-xs font-medium text-[var(--muted)]";
+
 export function ProductForm({
   onSubmit,
+  onSuccess,
+  initial,
+  submitLabel = "Simpan",
 }: {
   onSubmit: (p: ProductInput) => Promise<string | null>;
+  onSuccess?: () => void;
+  initial?: Partial<ProductInput>;
+  submitLabel?: string;
 }) {
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
-  const [stock, setStock] = useState("");
-  const [category, setCategory] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const isEdit = initial !== undefined;
+  const [name, setName] = useState(initial?.name ?? "");
+  const [price, setPrice] = useState(initial?.price != null ? String(initial.price) : "");
+  const [stock, setStock] = useState(initial?.stock != null ? String(initial.stock) : "");
+  const [sku, setSku] = useState(initial?.sku ?? "");
+  const [category, setCategory] = useState(initial?.category ?? "");
+  const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -32,78 +44,68 @@ export function ProductForm({
         name,
         price: Number(price) || 0,
         stock: Number(stock) || 0,
+        sku: sku.trim() || undefined,
         category: category.trim() || undefined,
         imageUrl: imageUrl.trim() || undefined,
       });
       if (err) {
         setError(err);
-      } else {
+        return;
+      }
+      if (!isEdit) {
         setName("");
         setPrice("");
         setStock("");
+        setSku("");
         setCategory("");
         setImageUrl("");
       }
+      onSuccess?.();
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div>
-      <form
-        onSubmit={submit}
-        className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4 elev-1 flex flex-wrap gap-3"
+    <form onSubmit={submit} className="space-y-4">
+      <div>
+        <label className={labelCls}>Nama produk</label>
+        <input value={name} onChange={(e) => setName(e.target.value)} required className={inputCls} placeholder="mis. Kopi Susu" />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelCls}>Harga (Rp)</label>
+          <input value={price} onChange={(e) => setPrice(e.target.value)} type="number" min="0" className={inputCls} placeholder="0" />
+        </div>
+        <div>
+          <label className={labelCls}>Stok</label>
+          <input value={stock} onChange={(e) => setStock(e.target.value)} type="number" min="0" className={inputCls} placeholder="0" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelCls}>SKU (opsional)</label>
+          <input value={sku} onChange={(e) => setSku(e.target.value)} className={`${inputCls} font-mono`} placeholder="mis. KP01" />
+        </div>
+        <div>
+          <label className={labelCls}>Kategori</label>
+          <input value={category} onChange={(e) => setCategory(e.target.value)} className={inputCls} placeholder="mis. Minuman" />
+        </div>
+      </div>
+      <div>
+        <label className={labelCls}>URL Gambar (opsional)</label>
+        <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} type="url" className={inputCls} placeholder="https://..." />
+      </div>
+
+      {error && <p className="text-sm text-[var(--error)]">{error}</p>}
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full rounded-lg bg-[var(--primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--primary-container)] disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        <input
-          placeholder="Nama"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          className="flex-[1_1_180px] rounded-lg border border-[var(--line)] px-3 py-2 text-sm text-[var(--ink)] bg-[var(--bg)] outline-none focus:border-[var(--primary)]"
-        />
-        <input
-          placeholder="Harga"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          type="number"
-          min="0"
-          className="w-32 rounded-lg border border-[var(--line)] px-3 py-2 text-sm text-[var(--ink)] bg-[var(--bg)] outline-none focus:border-[var(--primary)]"
-        />
-        <input
-          placeholder="Stok"
-          value={stock}
-          onChange={(e) => setStock(e.target.value)}
-          type="number"
-          min="0"
-          className="w-24 rounded-lg border border-[var(--line)] px-3 py-2 text-sm text-[var(--ink)] bg-[var(--bg)] outline-none focus:border-[var(--primary)]"
-        />
-        <input
-          placeholder="Kategori (mis. Makanan)"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="w-44 rounded-lg border border-[var(--line)] px-3 py-2 text-sm text-[var(--ink)] bg-[var(--bg)] outline-none focus:border-[var(--primary)]"
-        />
-        <input
-          placeholder="URL Gambar (opsional)"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          type="url"
-          className="flex-[1_1_220px] rounded-lg border border-[var(--line)] px-3 py-2 text-sm text-[var(--ink)] bg-[var(--bg)] outline-none focus:border-[var(--primary)]"
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--primary-container)] disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
-        >
-          {loading ? "Menyimpan..." : "Tambah"}
-        </button>
-      </form>
-      {error && (
-        <p className="mt-2 text-sm text-[var(--error)] pl-1">
-          {error}
-        </p>
-      )}
-    </div>
+        {loading ? "Menyimpan..." : submitLabel}
+      </button>
+    </form>
   );
 }
