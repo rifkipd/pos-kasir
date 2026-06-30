@@ -9,10 +9,20 @@ function where(range?: Range) {
 }
 
 export async function getSummary(db: PrismaClient, range?: Range) {
-  const rows = await db.transaction.findMany({ where: where(range), select: { totalAmount: true } });
+  const rows = await db.transaction.findMany({
+    where: where(range),
+    select: { totalAmount: true, items: { select: { quantity: true, costAtSale: true } } },
+  });
+  let totalSales = 0;
+  let totalCost = 0;
+  for (const r of rows) {
+    totalSales += r.totalAmount;
+    for (const it of r.items) totalCost += it.costAtSale * it.quantity;
+  }
   return {
-    totalSales: rows.reduce((a, r) => a + r.totalAmount, 0),
+    totalSales,
     transactionCount: rows.length,
+    totalProfit: totalSales - totalCost,
   };
 }
 

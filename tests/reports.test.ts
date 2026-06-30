@@ -156,3 +156,25 @@ test("getInventoryStatus mengklasifikasi stok pada batas ambang", async () => {
   expect(inv.total).toBe(3);
   await db3.$disconnect();
 });
+
+test("getSummary menghitung laba = pendapatan - modal", async () => {
+  const db5 = freshDb("test-profit.db");
+  const p = await createProduct(db5, { name: "Kopi", price: 10000, stock: 10, costPrice: 4000 });
+  await createTransaction(db5, { lines: [{ productId: p.id, quantity: 2 }], paidAmount: 20000 });
+  // pendapatan 20000, modal 4000*2=8000 -> laba 12000
+  const s = await getSummary(db5);
+  expect(s.totalSales).toBe(20000);
+  expect(s.totalProfit).toBe(12000);
+  await db5.$disconnect();
+});
+
+test("getSummary: laba memperhitungkan diskon", async () => {
+  const db6 = freshDb("test-profit-disc.db");
+  const p = await createProduct(db6, { name: "Kopi", price: 10000, stock: 10, costPrice: 4000 });
+  await createTransaction(db6, { lines: [{ productId: p.id, quantity: 1 }], paidAmount: 10000, discount: { type: "amount", value: 2000 } });
+  // total final 8000, modal 4000 -> laba 4000
+  const s = await getSummary(db6);
+  expect(s.totalSales).toBe(8000);
+  expect(s.totalProfit).toBe(4000);
+  await db6.$disconnect();
+});
