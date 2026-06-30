@@ -10,6 +10,7 @@ type Product = {
   name: string;
   price: number;
   stock: number;
+  sku?: string | null;
   category?: string | null;
   imageUrl?: string | null;
 };
@@ -37,6 +38,16 @@ export default function KasirPage() {
   const [query, setQuery] = useState("");
   const [activeCat, setActiveCat] = useState<string>(ALL);
   const [printData, setPrintData] = useState<ReceiptData | null>(null);
+  const [method, setMethod] = useState<"cash" | "qris" | "transfer">("cash");
+  const [discType, setDiscType] = useState<"amount" | "percent">("amount");
+  const [discValue, setDiscValue] = useState("");
+  const [settings, setSettings] = useState<{
+    storeName?: string | null;
+    address?: string | null;
+    phone?: string | null;
+    receiptFooter?: string | null;
+    qrisImageUrl?: string | null;
+  } | null>(null);
 
   function loadProducts() {
     fetch("/api/products?activeOnly=1")
@@ -46,6 +57,10 @@ export default function KasirPage() {
 
   useEffect(() => {
     loadProducts();
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/settings").then((r) => r.json()).then(setSettings).catch(() => {});
   }, []);
 
   // Trigger window.print() AFTER printData has been committed to the DOM.
@@ -108,8 +123,14 @@ export default function KasirPage() {
     return m;
   }, [products]);
 
-  const total = calcTotal(lines);
-  const paid = parseRupiah(paidText);
+  const subtotal = calcTotal(lines);
+  const discVal = Number(discValue) || 0;
+  const discountAmount = Math.min(
+    discType === "percent" ? Math.round((subtotal * discVal) / 100) : discVal,
+    subtotal
+  );
+  const total = subtotal - discountAmount;
+  const paid = method === "cash" ? parseRupiah(paidText) : total;
   let change = 0;
   try {
     change = calcChange(total, paid);
@@ -117,7 +138,7 @@ export default function KasirPage() {
     change = 0;
   }
 
-  const canPay = lines.length > 0 && paid >= total && total > 0;
+  const canPay = lines.length > 0 && total > 0 && (method !== "cash" || paid >= total);
 
   async function pay() {
     if (!canPay) return;
@@ -128,6 +149,8 @@ export default function KasirPage() {
       body: JSON.stringify({
         lines: lines.map((l) => ({ productId: l.productId, quantity: l.quantity })),
         paidAmount: paid,
+        paymentMethod: method,
+        discount: discountAmount > 0 ? { type: discType, value: discVal } : undefined,
       }),
     });
 
@@ -145,16 +168,26 @@ export default function KasirPage() {
     // the snapshot to DOM, guaranteeing content at print time.
     const snapshot: ReceiptData = {
       lines: [...lines],
+      subtotal,
+      discount: discountAmount,
       total,
       paid,
       change,
+      paymentMethod: method,
       invoiceNo: tx.invoiceNo as string,
       createdAt: tx.createdAt as string | undefined,
+      store: {
+        name: settings?.storeName,
+        address: settings?.address,
+        phone: settings?.phone,
+        footer: settings?.receiptFooter,
+      },
     };
 
     setPrintData(snapshot);  // commit snapshot → triggers useEffect → print
     setLines([]);            // clear cart (does NOT affect printData)
     setPaidText("");
+    setDiscValue("");
 
     // Refresh stock counts after sale
     loadProducts();
@@ -170,6 +203,16 @@ export default function KasirPage() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                const q = query.trim().toLowerCase();
+                const hit = products.find((p) => (p.sku ?? "").toLowerCase() === q);
+                if (hit && hit.stock > 0) {
+                  addToCart(hit);
+                  setQuery("");
+                }
+              }
+            }}
             placeholder="Cari produk (nama)..."
             className="w-full bg-transparent text-sm text-[var(--ink)] outline-none"
           />
@@ -260,7 +303,7 @@ export default function KasirPage() {
         <div className="flex items-center justify-between border-b border-[var(--line)] p-5">
           <div>
             <h2 className="text-lg font-bold text-[var(--ink)]">Pesanan</h2>
-            <p className="text-xs text-[var(--muted)]">Transaksi tunai</p>
+            <p className="text-xs text-[var(--muted)]">Transaksi</p>
           </div>
           {lines.length > 0 && (
             <button
@@ -331,34 +374,74 @@ export default function KasirPage() {
 
         {/* Summary + payment */}
         <div className="border-t border-[var(--line)] p-5">
+          {/* Subtotal & diskon */}
+          <div className="mb-1 flex items-center justify-between text-sm text-[var(--muted)]">
+            <span>Subtotal</span>
+            <span className="font-mono">{formatRupiah(subtotal)}</span>
+          </div>
+          <div className="mb-2 flex items-center gap-2">
+            <select value={discType} onChange={(e) => setDiscType(e.target.value as "amount" | "percent")}
+              className="rounded-lg border border-[var(--line)] bg-[var(--surface)] px-2 py-1.5 text-xs text-[var(--ink)] outline-none">
+              <option value="amount">Rp</option>
+              <option value="percent">%</option>
+            </select>
+            <input value={discValue} onChange={(e) => setDiscValue(e.target.value)} inputMode="numeric" placeholder="Diskon"
+              className="w-full rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-sm text-[var(--ink)] outline-none focus:border-[var(--primary)]" />
+          </div>
+
+          {/* Total */}
           <div className="mb-3 flex items-center justify-between">
             <span className="text-base font-bold text-[var(--ink)]">Total</span>
-            <span className="font-mono text-xl font-bold text-[var(--primary)]">
-              {formatRupiah(total)}
-            </span>
+            <span className="font-mono text-xl font-bold text-[var(--primary)]">{formatRupiah(total)}</span>
           </div>
 
-          <label className="mb-1 block text-xs text-[var(--muted)]">Uang Bayar</label>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={paidText}
-            onChange={(e) => setPaidText(e.target.value)}
-            placeholder="0"
-            className="w-full rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] outline-none transition-colors focus:border-[var(--primary)] box-border"
-          />
-
-          <div className="mt-2 flex items-center justify-between text-sm text-[var(--muted)]">
-            <span>Kembali</span>
-            <span className="font-mono">{formatRupiah(change)}</span>
+          {/* Metode bayar */}
+          <div className="mb-3 grid grid-cols-3 gap-2">
+            {(["cash", "qris", "transfer"] as const).map((m) => (
+              <button key={m} type="button" onClick={() => setMethod(m)}
+                className={`rounded-lg border px-2 py-1.5 text-xs font-medium ${
+                  method === m ? "border-[var(--primary)] bg-[var(--surface-container)] text-[var(--primary)]" : "border-[var(--line)] text-[var(--muted)]"
+                }`}>
+                {m === "cash" ? "Tunai" : m === "qris" ? "QRIS" : "Transfer"}
+              </button>
+            ))}
           </div>
+
+          {method === "cash" && (
+            <>
+              <label className="mb-1 block text-xs text-[var(--muted)]">Uang Bayar</label>
+              <input type="text" inputMode="numeric" value={paidText} onChange={(e) => setPaidText(e.target.value)} placeholder="0"
+                className="w-full rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--primary)] box-border" />
+              <div className="mt-2 flex items-center justify-between text-sm text-[var(--muted)]">
+                <span>Kembali</span><span className="font-mono">{formatRupiah(change)}</span>
+              </div>
+            </>
+          )}
+
+          {method === "qris" && (
+            <div className="rounded-lg border border-[var(--line)] p-3 text-center">
+              {settings?.qrisImageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={settings.qrisImageUrl} alt="QRIS" className="mx-auto h-40 w-40 object-contain" />
+              ) : (
+                <p className="text-xs text-[var(--muted)]">QRIS belum diatur (atur di Pengaturan).</p>
+              )}
+              <p className="mt-1 text-xs text-[var(--muted)]">Scan untuk bayar {formatRupiah(total)}</p>
+            </div>
+          )}
+
+          {method === "transfer" && (
+            <p className="rounded-lg border border-[var(--line)] p-3 text-xs text-[var(--muted)]">
+              Konfirmasi transfer sebesar {formatRupiah(total)} sebelum menyelesaikan.
+            </p>
+          )}
 
           <button
             onClick={pay}
             disabled={!canPay}
             className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--primary)] py-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--primary-container)] disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <Icon name="point_of_sale" size={18} /> Bayar &amp; Cetak
+            <Icon name="point_of_sale" size={18} /> {method === "cash" ? "Bayar & Cetak" : "Selesai & Cetak"}
           </button>
         </div>
       </aside>
