@@ -5,3 +5,8 @@ import { sessionOptions, type SessionData } from "@/lib/auth";
 export async function getSession() {
   return getIronSession<SessionData>(await cookies(), sessionOptions);
 }
+
+export async function requireAdmin(): Promise<boolean> {
+  const session = await getSession();
+  return session.role === "admin";
+}
