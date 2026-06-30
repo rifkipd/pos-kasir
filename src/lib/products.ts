@@ -1,7 +1,7 @@
 import type { PrismaClient, Product } from "@prisma/client";
 
-type CreateInput = { name: string; price: number; stock?: number; sku?: string; category?: string };
-type UpdateInput = Partial<{ name: string; price: number; stock: number; sku: string; category: string; isActive: boolean }>;
+type CreateInput = { name: string; price: number; stock?: number; sku?: string; category?: string; imageUrl?: string };
+type UpdateInput = Partial<{ name: string; price: number; stock: number; sku: string; category: string; imageUrl: string; isActive: boolean }>;
 
 function validate(input: { name?: string; price?: number; stock?: number }) {
   if (input.name !== undefined && input.name.trim() === "") throw new Error("Nama wajib diisi");
@@ -25,6 +25,7 @@ export async function createProduct(db: PrismaClient, input: CreateInput): Promi
       stock: input.stock ?? 0,
       sku: input.sku || null,
       category: input.category || null,
+      imageUrl: input.imageUrl || null,
     },
   });
 }

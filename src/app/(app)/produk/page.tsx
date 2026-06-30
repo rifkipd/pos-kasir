@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { ProductForm, type ProductInput } from "@/app/components/ProductForm";
+import { Icon } from "@/app/components/ui/Icon";
 import { formatRupiah } from "@/lib/money";
 
 type Product = {
@@ -9,6 +10,7 @@ type Product = {
   price: number;
   stock: number;
   category?: string | null;
+  imageUrl?: string | null;
 };
 
 export default function ProdukPage() {
@@ -71,7 +73,28 @@ export default function ProdukPage() {
             )}
             {products.map((p) => (
               <tr key={p.id} className="border-t border-[var(--line)]">
-                <td className="px-4 py-3 text-[var(--ink)]">{p.name}</td>
+                <td className="px-4 py-3 text-[var(--ink)]">
+                  <div className="flex items-center gap-3">
+                    {p.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={p.imageUrl}
+                        alt={p.name}
+                        className="h-9 w-9 rounded-lg object-cover border border-[var(--line)]"
+                      />
+                    ) : (
+                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--surface-container)] text-[var(--primary)]">
+                        <Icon name="inventory_2" size={18} />
+                      </span>
+                    )}
+                    <div>
+                      <div className="font-medium">{p.name}</div>
+                      {p.category && (
+                        <div className="text-xs text-[var(--muted)]">{p.category}</div>
+                      )}
+                    </div>
+                  </div>
+                </td>
                 <td className="px-4 py-3 text-[var(--ink)]">
                   {formatRupiah(p.price)}
                 </td>

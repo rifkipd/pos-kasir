@@ -14,6 +14,13 @@ test("createProduct lalu listProducts", async () => {
   expect(all.find((x) => x.id === p.id)?.name).toBe("Kopi");
 });
 
+test("createProduct menyimpan imageUrl", async () => {
+  const p = await createProduct(db, { name: "Roti", price: 5000, imageUrl: "https://example.com/roti.jpg" });
+  expect(p.imageUrl).toBe("https://example.com/roti.jpg");
+  const blank = await createProduct(db, { name: "Tanpa Gambar", price: 5000 });
+  expect(blank.imageUrl).toBeNull();
+});
+
 test("createProduct menolak harga negatif", async () => {
   await expect(createProduct(db, { name: "X", price: -1 })).rejects.toThrow("Harga tidak boleh negatif");
 });
